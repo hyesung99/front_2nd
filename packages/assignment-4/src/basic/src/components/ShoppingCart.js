@@ -1,8 +1,9 @@
 import { Component } from "../core/component";
+import { ShoppingCartService } from "../services/shoppingCartService";
 
 export class ShoppingCart extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       items: {},
     };
@@ -18,21 +19,28 @@ export class ShoppingCart extends Component {
   mount() {
     this.addEventDelegate("click", ".quantity-change", (e) => {
       const productId = e.target.dataset.productId;
-      const newState = { ...this.state };
-      newState.items[productId].quantity += parseInt(e.target.dataset.change);
-      if (newState.items[productId].quantity <= 0) {
-        delete newState.items[productId];
-      }
-      this.setState(newState);
+      const change = parseInt(e.target.dataset.change);
+      const newItems = ShoppingCartService.updateQuantity(
+        this.state.items,
+        productId,
+        change
+      );
+      this.setState({ items: newItems });
     });
 
     this.addEventDelegate("click", ".remove-item", (e) => {
       const productId = e.target.dataset.productId;
-
-      const newState = { ...this.state };
-      delete newState.items[productId];
-      this.setState(newState);
+      const newItems = ShoppingCartService.removeItem(
+        this.state.items,
+        productId
+      );
+      this.setState({ items: newItems });
     });
+  }
+
+  addItem(product) {
+    const newItems = ShoppingCartService.addItem(this.state.items, product);
+    this.setState({ items: newItems });
   }
 
   render() {
@@ -48,47 +56,12 @@ export class ShoppingCart extends Component {
       )
       .join("");
 
-    const total = Object.values(this.state.items).reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const total = ShoppingCartService.getTotal(this.state.items);
 
     this.element.innerHTML = `
       <h1 class="text-2xl font-bold mb-4">장바구니</h1>
       <div id="cart-items">${cartItemsHtml}</div>
       <div id="cart-total" class="text-xl font-bold my-4">총액: ${total}원</div>
     `;
-  }
-
-  addItem(product) {
-    const items = { ...this.state.items };
-    if (items[product.id]) {
-      items[product.id].quantity += 1;
-    } else {
-      items[product.id] = { ...product, quantity: 1 };
-    }
-
-    this.setState({ items });
-  }
-
-  updateQuantity(productId, change) {
-    this.setState((prevState) => {
-      const items = { ...prevState.items };
-      if (items[productId]) {
-        items[productId].quantity += change;
-        if (items[productId].quantity <= 0) {
-          delete items[productId];
-        }
-      }
-      return { items };
-    });
-  }
-
-  removeItem(productId) {
-    this.setState((prevState) => {
-      const items = { ...prevState.items };
-      delete items[productId];
-      return { items };
-    });
   }
 }

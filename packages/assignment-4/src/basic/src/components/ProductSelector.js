@@ -1,11 +1,11 @@
 import { Component } from "../core/component";
-import { PRODUCTS } from "../model/products";
+import { ProductService } from "../services/productSelector";
 
 export class ProductSelector extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      selectedProduct: PRODUCTS[0]?.id || null,
+      selectedProduct: ProductService.getInitialProductId(),
     };
     this.render();
   }
@@ -18,8 +18,8 @@ export class ProductSelector extends Component {
 
   mount() {
     this.addEventDelegate("click", "#add-to-cart", () => {
-      const selectedProduct = PRODUCTS.find(
-        (p) => p.id === this.state.selectedProduct
+      const selectedProduct = ProductService.getProductById(
+        this.state.selectedProduct
       );
       if (selectedProduct) {
         this.props.onAdd(selectedProduct);
@@ -31,14 +31,17 @@ export class ProductSelector extends Component {
   }
 
   render() {
+    const productOptions = ProductService.getProductOptions();
     this.element.innerHTML = `
       <select id="product-select" class="border rounded p-2 mr-2">
-        ${PRODUCTS.map(
-          (p) =>
-            `<option value="${p.id}" ${
-              p.id === this.state.selectedProduct ? "selected" : ""
-            }>${p.name} - ${p.price}원</option>`
-        ).join("")}
+        ${productOptions
+          .map(
+            (p) =>
+              `<option value="${p.id}" ${
+                p.id === this.state.selectedProduct ? "selected" : ""
+              }>${p.name} - ${p.price}원</option>`
+          )
+          .join("")}
       </select>
       <button id="add-to-cart" class="bg-blue-500 text-white px-4 py-2 rounded">추가</button>
     `;
