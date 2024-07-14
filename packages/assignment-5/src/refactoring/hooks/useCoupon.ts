@@ -10,7 +10,7 @@ export const useCoupons = (initialCoupons: Coupon[]) => {
 
   const removeCoupon = ({ coupon }: { coupon: Coupon }) => {
     setCoupons(
-      coupons.filter((searchCoupon) => coupon.code !== searchCoupon.code)
+      coupons.filter((selectedCoupon) => coupon.code !== selectedCoupon.code)
     );
   };
 
