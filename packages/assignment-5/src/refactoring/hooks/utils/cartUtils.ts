@@ -27,22 +27,29 @@ export const getMaxApplicableDiscount = (item: CartItem) => {
   return maxDiscountRate;
 };
 
+const applyCoupon = (price: number, coupon: Coupon | null) => {
+  if (!coupon) {
+    return price;
+  }
+  if (coupon.discountType === "amount") {
+    return price - coupon.discountValue;
+  }
+  return price * (1 - coupon.discountValue / 100);
+};
+
 export const calculateCartTotal = (
   cart: CartItem[],
   selectedCoupon: Coupon | null
 ) => {
   const totalBeforeDiscount = cart.reduce(
-    (acc, item) => acc + calculateItemTotal(item),
+    (acc, item) => acc + item.product.price * item.quantity,
     0
   );
-  const totalAfterDiscount = cart.reduce(
-    (acc, item) => acc + calculateItemTotal(item),
-    0
+  const totalAfterDiscount = applyCoupon(
+    cart.reduce((acc, item) => acc + calculateItemTotal(item), 0),
+    selectedCoupon
   );
-  const totalDiscount = cart.reduce(
-    (acc, item) => acc + calculateItemTotal(item),
-    0
-  );
+  const totalDiscount = totalBeforeDiscount - totalAfterDiscount;
   return {
     totalBeforeDiscount,
     totalAfterDiscount,
