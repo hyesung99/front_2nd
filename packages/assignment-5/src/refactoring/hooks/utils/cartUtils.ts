@@ -62,5 +62,16 @@ export const updateCartItemQuantity = (
   productId: string,
   newQuantity: number
 ): CartItem[] => {
-  return [];
+  return cart.reduce((updatedCart, item) => {
+    if (item.product.id === productId) {
+      if (newQuantity <= 0) {
+        return updatedCart;
+      }
+
+      const updatedQuantity = Math.min(newQuantity, item.product.stock);
+      return [...updatedCart, { ...item, quantity: updatedQuantity }];
+    }
+
+    return [...updatedCart, item];
+  }, [] as CartItem[]);
 };
