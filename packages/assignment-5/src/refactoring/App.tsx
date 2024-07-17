@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { AdminPage } from "./components/AdminPage.tsx";
-import { CartPage } from "./components/CartPage.tsx";
+import { AdminPage } from "./pages/AdminPage.tsx";
+import { CartPage } from "./pages/CartPage.tsx";
 import { useCoupons, useProducts } from "./hooks";
 import { DISCOUNT_COUPONS } from "./model/coupons/discountCoupon.ts";
 import { PRODUCTS } from "./model/products/product.ts";
