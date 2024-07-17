@@ -3,7 +3,7 @@ import { CartItem, Coupon } from "../../../types";
 export const calculateItemTotal = (item: CartItem) => {
   const baseTotal = item.product.price * item.quantity;
   const discountRate = getMaxApplicableDiscount(item);
-  return baseTotal * (1 - discountRate); // 할인율을 적용
+  return baseTotal * (1 - discountRate);
 };
 
 export const getMaxApplicableDiscount = (item: CartItem) => {
@@ -62,16 +62,19 @@ export const updateCartItemQuantity = (
   productId: string,
   newQuantity: number
 ): CartItem[] => {
-  return cart.reduce((updatedCart, item) => {
+  if (newQuantity < 0) {
+    throw new Error("업데이트 할 수량은 0 이상이어야 합니다.");
+  }
+
+  if (newQuantity === 0) {
+    return cart.filter((item) => item.product.id !== productId);
+  }
+
+  return cart.map((item) => {
     if (item.product.id === productId) {
-      if (newQuantity <= 0) {
-        return updatedCart;
-      }
-
       const updatedQuantity = Math.min(newQuantity, item.product.stock);
-      return [...updatedCart, { ...item, quantity: updatedQuantity }];
+      return { ...item, quantity: updatedQuantity };
     }
-
-    return [...updatedCart, item];
-  }, [] as CartItem[]);
+    return item;
+  });
 };
