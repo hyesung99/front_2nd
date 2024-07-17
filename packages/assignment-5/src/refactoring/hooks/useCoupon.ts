@@ -4,11 +4,11 @@ import { Coupon } from "../model/coupons/coupons.type";
 export const useCoupons = (initialCoupons: Coupon[]) => {
   const [coupons, setCoupons] = useState<Coupon[]>(initialCoupons);
 
-  const addCoupon = ({ coupon }: { coupon: Coupon }) => {
+  const addCoupon = (coupon: Coupon) => {
     setCoupons([...coupons, coupon]);
   };
 
-  const removeCoupon = ({ coupon }: { coupon: Coupon }) => {
+  const removeCoupon = (coupon: Coupon) => {
     setCoupons(
       coupons.filter((selectedCoupon) => coupon.code !== selectedCoupon.code)
     );
