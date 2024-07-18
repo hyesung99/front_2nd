@@ -11,7 +11,6 @@ interface Props {
 export const CartPage = ({ products, coupons }: Props) => {
   const {
     cart,
-    addToCart,
     removeFromCart,
     updateQuantity,
     applyCoupon,
@@ -41,11 +40,7 @@ export const CartPage = ({ products, coupons }: Props) => {
         <div>
           <h2 className="text-2xl font-semibold mb-4">상품 목록</h2>
           <div className="space-y-2">
-            <ProductContainer
-              addToCart={addToCart}
-              cart={cart}
-              products={products}
-            />
+            <ProductContainer products={products} />
           </div>
         </div>
         <div>
