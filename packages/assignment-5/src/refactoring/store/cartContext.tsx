@@ -33,6 +33,7 @@ interface CartState {
   selectedCoupon: Coupon | null;
 }
 
+//순수함수로 구성
 const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case "ADD_TO_CART":
@@ -88,14 +89,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
 
   const addToCart = useCallback((product: Product) => {
+    //TODO: DB 연동 시 api 붙이기
     dispatch({ type: "ADD_TO_CART", payload: product });
   }, []);
 
   const removeFromCart = useCallback((productId: string) => {
+    //TODO: DB 연동 시 api 붙이기
     dispatch({ type: "REMOVE_FROM_CART", payload: productId });
   }, []);
 
   const updateQuantity = useCallback(
+    //TODO: DB 연동 시 api 붙이기
     (productId: string, newQuantity: number) => {
       dispatch({
         type: "UPDATE_QUANTITY",
@@ -106,6 +110,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   );
 
   const applyCoupon = useCallback((coupon: Coupon) => {
+    //TODO: DB 연동 시 api 붙이기
     dispatch({ type: "APPLY_COUPON", payload: coupon });
   }, []);
 
