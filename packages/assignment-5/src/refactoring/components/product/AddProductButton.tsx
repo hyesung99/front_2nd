@@ -1,24 +1,26 @@
 import { HTMLAttributes } from "react";
 
 interface AddProductButtonProps extends HTMLAttributes<HTMLButtonElement> {
-  remainingStock: number;
+  buttonText: string;
+  disabled: boolean;
 }
 
 const AddProductButton = ({
-  remainingStock,
+  buttonText,
+  disabled,
   ...props
 }: AddProductButtonProps) => {
   return (
     <button
-      {...props}
       className={`w-full px-3 py-1 rounded ${
-        remainingStock > 0
-          ? "bg-blue-500 text-white hover:bg-blue-600"
-          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        disabled
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+          : "bg-blue-500 text-white hover:bg-blue-600"
       }`}
-      disabled={remainingStock <= 0}
+      disabled={disabled}
+      {...props}
     >
-      {remainingStock > 0 ? "장바구니에 추가" : "품절"}
+      {buttonText}
     </button>
   );
 };

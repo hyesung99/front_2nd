@@ -1,5 +1,6 @@
 import { Product } from "../../../types";
 import { useCart } from "../../hooks";
+import { useAddProductButtonProps } from "../../hooks/useAddProductButtonProps";
 import { getRemainingStock } from "../../hooks/utils/productUtils";
 import AddProductButton from "./AddProductButton";
 import { ProductCard } from "./ProductCard";
@@ -27,7 +28,7 @@ export const ProductContainer = ({ products }: ProductContainerProps) => {
           >
             <AddProductButton
               onClick={() => handleAddProductButtonClick(product)}
-              remainingStock={remainingStock}
+              {...useAddProductButtonProps(remainingStock)}
             />
           </ProductCard>
         );
