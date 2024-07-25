@@ -116,54 +116,33 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
+      - name: Check out
+        uses: actions/checkout@v4
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8
 
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
       - name: Install dependencies
         run: pnpm install
 
-      - name: Install coverage dependency
-        run: pnpm add -D @vitest/coverage-v8
-        working-directory: packages/assignment-6
+      - name: Create test coverage
+        run: pnpm --filter assignment-6 test:coverage
 
-      - name: Run tests and generate coverage
-        run: pnpm vitest run --coverage
-        working-directory: packages/assignment-6
-
-      - name: Comment PR with test coverage
+      - name: Report coverage
         if: always()
-        uses: actions/github-script@v6
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
+          json-summary-path: packages/assignment-6/coverage/coverage-summary.json
+          json-final-path: packages/assignment-6/coverage/coverage-final.json
           github-token: ${{ secrets.TOKEN_FOR_CI }}
-          script: |
-            const fs = require('fs');
-            const coverageSummary = fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8');
-            const coverage = JSON.parse(coverageSummary);
-
-            let commentBody = '## 테스트 커버리지 결과\n\n';
-            commentBody += '| 항목 | 커버리지 |\n';
-            commentBody += '|------|----------|\n';
-            commentBody += `| Lines | ${coverage.total.lines.pct}% |\n`;
-            commentBody += `| Statements | ${coverage.total.statements.pct}% |\n`;
-            commentBody += `| Functions | ${coverage.total.functions.pct}% |\n`;
-            commentBody += `| Branches | ${coverage.total.branches.pct}% |\n`;
-
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: commentBody
-            })
 
   lighthouse:
     runs-on: ubuntu-latest
