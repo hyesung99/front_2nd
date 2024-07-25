@@ -116,8 +116,50 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: job3 구현
-        run: echo "job3의 내용을 구현해주세요"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run tests and generate coverage
+        run: pnpm vitest run --coverage
+        working-directory: packages/assignment-6
+
+      - name: Comment PR with test coverage
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            const fs = require('fs');
+            const coverageSummary = fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8');
+            const coverage = JSON.parse(coverageSummary);
+
+            let commentBody = '## 테스트 커버리지 결과\n\n';
+            commentBody += '| 항목 | 커버리지 |\n';
+            commentBody += '|------|----------|\n';
+            commentBody += `| Lines | ${coverage.total.lines.pct}% |\n`;
+            commentBody += `| Statements | ${coverage.total.statements.pct}% |\n`;
+            commentBody += `| Functions | ${coverage.total.functions.pct}% |\n`;
+            commentBody += `| Branches | ${coverage.total.branches.pct}% |\n`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
