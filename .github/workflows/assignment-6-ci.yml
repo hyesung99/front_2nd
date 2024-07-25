@@ -222,7 +222,6 @@ jobs:
 
   assign_reviewer:
     runs-on: ubuntu-latest
-    if: github.event.action == 'opened'
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
