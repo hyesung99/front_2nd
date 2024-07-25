@@ -181,21 +181,6 @@ jobs:
           lhci autorun --collect.startServerCommand="pnpm preview" --collect.url="http://localhost:4173" --upload.target=temporary-public-storage
         working-directory: packages/assignment-6
 
-      - name: Format Lighthouse results
-        id: format_results
-        run: |
-          LHCI_REPORT=$(cat ./packages/assignment-6/.lighthouseci/manifest.json)
-          echo "LIGHTHOUSE_RESULTS<<EOF" >> $GITHUB_OUTPUT
-          echo "## Lighthouse 결과" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo "| 카테고리 | 점수 |" >> $GITHUB_OUTPUT
-          echo "|----------|------|" >> $GITHUB_OUTPUT
-          echo "| Performance | $(echo $LHCI_REPORT | jq -r '.[0].summary.performance * 100')%" >> $GITHUB_OUTPUT
-          echo "| Accessibility | $(echo $LHCI_REPORT | jq -r '.[0].summary.accessibility * 100')%" >> $GITHUB_OUTPUT
-          echo "| Best Practices | $(echo $LHCI_REPORT | jq -r '.[0].summary["best-practices"] * 100')%" >> $GITHUB_OUTPUT
-          echo "| SEO | $(echo $LHCI_REPORT | jq -r '.[0].summary.seo * 100')%" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
       - name: Comment PR with Lighthouse results
         uses: actions/github-script@v6
         with:
