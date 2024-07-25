@@ -132,6 +132,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Install coverage dependency
+        run: pnpm add -D @vitest/coverage-v8
+        working-directory: packages/assignment-6
+
       - name: Run tests and generate coverage
         run: pnpm vitest run --coverage
         working-directory: packages/assignment-6
@@ -140,7 +144,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.TOKEN_FOR_CI}}
+          github-token: ${{ secrets.TOKEN_FOR_CI }}
           script: |
             const fs = require('fs');
             const coverageSummary = fs.readFileSync('packages/assignment-6/coverage/coverage-summary.json', 'utf8');
@@ -207,7 +211,7 @@ jobs:
       - name: Comment PR with Lighthouse results
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -226,9 +230,9 @@ jobs:
       - name: Assign Reviewer
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const teamMembers = ['zhwltlr', 'shiny1912', 'haeji1124'];
+            const teamMembers = ['member1', 'member2', 'member3', 'member4'];
             const selectedReviewer = teamMembers[Math.floor(Math.random() * teamMembers.length)];
 
             // PR에 리뷰어 할당
