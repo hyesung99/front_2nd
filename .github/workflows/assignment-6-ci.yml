@@ -120,33 +120,49 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v4
         with:
-          version: 8
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+          version: latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
           node-version: 20
-          cache: "pnpm"
-
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Create test coverage
-        run: pnpm --filter assignment-6 test:coverage
-
-      - name: Report coverage
-        if: always()
-        uses: davelosert/vitest-coverage-report-action@v2
+        run: |
+          cd packages/assignment-6
+          pnpm install
+          pnpm install -D vitest jsdom @vitest/coverage-v8
+      - name: Run tests and generate coverage
+        run: |
+          cd packages/assignment-6
+          pnpm run test
+      - name: Generate coverage report
+        id: coverage
+        run: |
+          LINE=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.lines.pct')
+          BRANCH=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.branches.pct')
+          FUNCTION=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.functions.pct')
+          STATEMENT=$(cat packages/assignment-6/coverage/coverage-summary.json | jq -r '.total.statements.pct')
+          echo "LINE=${LINE}" >> $GITHUB_OUTPUT
+          echo "BRANCH=${BRANCH}" >> $GITHUB_OUTPUT
+          echo "FUNCTION=${FUNCTION}" >> $GITHUB_OUTPUT
+          echo "STATEMENT=${STATEMENT}" >> $GITHUB_OUTPUT
+      - name: Comment PR
+        uses: actions/github-script@v6
         with:
-          json-summary-path: packages/assignment-6/coverage/coverage-summary.json
-          json-final-path: packages/assignment-6/coverage/coverage-final.json
-          github-token: ${{ secrets.TOKEN_FOR_CI }}
+          github-token: ${{secrets.TOKEN_FOR_CI}}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 커버리지 결과
+              * 라인 커버리지: ${{steps.coverage.outputs.line}}%
+            * 브랜치 커버리지: ${{steps.coverage.outputs.branch}}%
+            * 함수 커버리지: ${{steps.coverage.outputs.function}}%
+            * 구문 커버리지: ${{steps.coverage.outputs.statement}}%`
+            })
 
   lighthouse:
     runs-on: ubuntu-latest
