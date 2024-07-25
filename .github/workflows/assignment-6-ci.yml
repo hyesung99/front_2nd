@@ -161,11 +161,60 @@ jobs:
               body: commentBody
             })
 
-  lighthouse:
-    runs-on: ubuntu-latest
-    steps:
-      - name: job4 구현
-        run: echo "job4의 내용을 구현해주세요"
+            lighthouse:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout code
+                  uses: actions/checkout@v3
+
+                - name: Setup Node.js
+                  uses: actions/setup-node@v3
+                  with:
+                    node-version: "18"
+
+                - name: Install dependencies
+                  run: |
+                    npm install
+                    npm run build
+                  working-directory: packages/assignment-6
+
+                - name: Run Lighthouse CI
+                  id: lighthouse
+                  uses: treosh/lighthouse-ci-action@v10
+                  with:
+                    urls: |
+                      https://your-deployed-url.com
+                    uploadArtifacts: true
+                    temporaryPublicStorage: true
+
+                - name: Format Lighthouse results
+                  id: format_results
+                  run: |
+                    echo "LIGHTHOUSE_RESULTS<<EOF" >> $GITHUB_OUTPUT
+                    echo "## Lighthouse 결과" >> $GITHUB_OUTPUT
+                    echo "" >> $GITHUB_OUTPUT
+                    echo "| 카테고리 | 점수 |" >> $GITHUB_OUTPUT
+                    echo "|----------|------|" >> $GITHUB_OUTPUT
+                    echo "| Performance | $(jq '.[] | .summary.performance' ${{ steps.lighthouse.outputs.manifest }})" >> $GITHUB_OUTPUT
+                    echo "| Accessibility | $(jq '.[] | .summary.accessibility' ${{ steps.lighthouse.outputs.manifest }})" >> $GITHUB_OUTPUT
+                    echo "| Best Practices | $(jq '.[] | .summary["best-practices"]' ${{ steps.lighthouse.outputs.manifest }})" >> $GITHUB_OUTPUT
+                    echo "| SEO | $(jq '.[] | .summary.seo' ${{ steps.lighthouse.outputs.manifest }})" >> $GITHUB_OUTPUT
+                    echo "| Progressive Web App | $(jq '.[] | .summary.pwa' ${{ steps.lighthouse.outputs.manifest }})" >> $GITHUB_OUTPUT
+                    echo "" >> $GITHUB_OUTPUT
+                    echo "자세한 결과: ${{ steps.lighthouse.outputs.links }}" >> $GITHUB_OUTPUT
+                    echo "EOF" >> $GITHUB_OUTPUT
+
+                - name: Comment PR with Lighthouse results
+                  uses: actions/github-script@v6
+                  with:
+                    github-token: ${{ secrets.TOKEN_FOR_CI }}
+                    script: |
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `${{ steps.format_results.outputs.LIGHTHOUSE_RESULTS }}`
+                      })
 
   assign_reviewer:
     runs-on: ubuntu-latest
