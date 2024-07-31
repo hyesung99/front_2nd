@@ -1,34 +1,58 @@
 import { http, HttpResponse } from "msw";
+import { Event } from "./App";
 
-let todos = [
-  { id: 1, text: "테스트 할 일 1", completed: false },
-  { id: 2, text: "테스트 할 일 2", completed: true },
+let events: Event[] = [
+  {
+    id: 1,
+    title: "테스트 일정 1",
+    date: "2023-06-15",
+    startTime: "09:00",
+    endTime: "10:00",
+    description: "테스트 설명 1",
+    location: "테스트 위치 1",
+    category: "업무",
+    repeat: { type: "none", interval: 1 },
+    notificationTime: 10,
+  },
+  {
+    id: 2,
+    title: "테스트 일정 2",
+    date: "2023-06-16",
+    startTime: "14:00",
+    endTime: "15:00",
+    description: "테스트 설명 2",
+    location: "테스트 위치 2",
+    category: "개인",
+    repeat: { type: "weekly", interval: 1, endDate: "2023-07-16" },
+    notificationTime: 30,
+  },
 ];
 
 export const mockApiHandlers = [
-  http.get("/todos", () => {
-    return HttpResponse.json(todos);
+  http.get("/api/events", () => {
+    return HttpResponse.json(events);
   }),
 
-  http.post("/todos", async ({ request }) => {
-    const { text } = (await request.json()) as { text: string };
-    const newTodo = { id: todos.length + 1, text, completed: false };
-    todos.push(newTodo);
-    return HttpResponse.json(newTodo, { status: 201 });
+  http.post("/api/events", async ({ request }) => {
+    const newEvent = (await request.json()) as Event;
+    newEvent.id = events.length + 1;
+    events.push(newEvent);
+    return HttpResponse.json(newEvent, { status: 201 });
   }),
 
-  http.put("/todos/:id", async ({ params, request }) => {
+  http.put("/api/events/:id", async ({ params, request }) => {
     const { id } = params;
-    const updates = (await request.json()) as Record<string, unknown>;
-    todos = todos.map((todo) =>
-      todo.id === Number(id) ? { ...todo, ...updates } : todo
+    const updates = (await request.json()) as Partial<Event>;
+    events = events.map((event) =>
+      event.id === Number(id) ? { ...event, ...updates } : event
     );
-    return HttpResponse.json(todos.find((todo) => todo.id === Number(id)));
+    const updatedEvent = events.find((event) => event.id === Number(id));
+    return HttpResponse.json(updatedEvent);
   }),
 
-  http.delete("/todos/:id", ({ params }) => {
+  http.delete("/api/events/:id", ({ params }) => {
     const { id } = params;
-    todos = todos.filter((todo) => todo.id !== Number(id));
+    events = events.filter((event) => event.id !== Number(id));
     return new HttpResponse(null, { status: 204 });
   }),
 ];
