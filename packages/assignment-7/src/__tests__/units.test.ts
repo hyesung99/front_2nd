@@ -39,6 +39,18 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
         expect(getDaysInMonth(2023, month)).toBeLessThan(32);
       });
     });
+
+    test("윤년의 2월을 정확히 처리한다", () => {
+      expect(getDaysInMonth(2020, 1)).toBe(29);
+      expect(getDaysInMonth(2024, 1)).toBe(29);
+      expect(getDaysInMonth(2000, 1)).toBe(29);
+      expect(getDaysInMonth(2100, 1)).toBe(28);
+      expect(getDaysInMonth(2200, 1)).toBe(28);
+      expect(getDaysInMonth(2300, 1)).toBe(28);
+      expect(getDaysInMonth(2400, 1)).toBe(29);
+    });
+
+    test("잘못된 입력값을 처리한다", () => {});
   });
 
   describe("getWeekDates 함수", () => {
@@ -89,6 +101,16 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
       expect(weekDates[6].getDate()).toBe(7);
     });
 
+    test("윤년의 2월 말을 포함하는 주를 정확히 처리한다", () => {
+      const date = new Date(2024, 1, 28);
+      const weekDates = getWeekDates(date);
+
+      expect(weekDates[0].getDate()).toBe(26);
+      expect(weekDates[3].getDate()).toBe(29);
+      expect(weekDates[4].getDate()).toBe(1);
+      expect(weekDates[6].getDate()).toBe(3);
+    });
+
     test("반환값이 Date 객체의 배열인지 확인한다", () => {
       const date = new Date(2024, 0, 3);
       const weekDates = getWeekDates(date);
@@ -119,6 +141,10 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     test("반환값이 올바른 형식의 문자열인지 확인한다", () => {
       const result = formatWeek(new Date(2024, 5, 15));
       expect(result).toMatch(/^\d{4}년 \d{1,2}월 \d주$/);
+    });
+
+    test("윤년의 2월 말을 포함하는 주를 올바르게 포맷팅한다", () => {
+      expect(formatWeek(new Date(2024, 1, 28))).toBe("2024년 2월 4주");
     });
   });
 
