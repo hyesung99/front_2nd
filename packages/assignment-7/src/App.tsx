@@ -609,6 +609,7 @@ function App() {
           <FormSelect
             value={category}
             onChange={setCategory}
+            label="카테고리"
             placeholder="카테고리 선택"
             options={categories.map((cat) => ({
               value: cat,

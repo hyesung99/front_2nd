@@ -182,8 +182,4 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
       expect(result).toMatch(/^\d{4}년 \d{1,2}월$/);
     });
   });
-
-  describe("isDateInRange 함수", () => {
-    // test.fails("주어진 날짜가 특정 범위 내에 있는지 정확히 판단한다");
-  });
 });
