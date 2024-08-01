@@ -41,6 +41,7 @@ import { useEffect, useRef, useState } from "react";
 import { FormCheckbox } from "./components/common/FormCheckbox";
 import { FormField } from "./components/common/FormField";
 import { FormSelect } from "./components/common/FormSelect";
+import { useEvents } from "./hooks/useEvents";
 import { formatMonth } from "./utils/formatMonth";
 import { formatWeek } from "./utils/formatWeek";
 import { getDaysInMonth } from "./utils/getDatysInMonth";
@@ -54,7 +55,7 @@ interface RepeatInfo {
   endDate?: string;
 }
 
-interface Event {
+export interface Event {
   id: number;
   title: string;
   date: string;
@@ -78,8 +79,6 @@ const notificationOptions = [
   { value: 120, label: "2시간 전" },
   { value: 1440, label: "1일 전" },
 ];
-
-const dummyEvents: Event[] = [];
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -106,7 +105,8 @@ const fetchHolidays = (year: number, month: number) => {
 };
 
 function App() {
-  const [events, setEvents] = useState<Event[]>(dummyEvents);
+  const { events, addEvent, updateEvent, deleteEvent } = useEvents();
+
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -141,26 +141,8 @@ function App() {
 
   const toast = useToast();
 
-  const fetchEvents = async () => {
-    try {
-      const response = await fetch("/api/events");
-      if (!response.ok) {
-        throw new Error("Failed to fetch events");
-      }
-      const data = await response.json();
-      setEvents(data);
-    } catch (error) {
-      console.error("Error fetching events:", error);
-      toast({
-        title: "이벤트 로딩 실패",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   const addOrUpdateEvent = async () => {
+    console.log(title, date, startTime, endTime);
     if (!title || !date || !startTime || !endTime) {
       toast({
         title: "필수 정보를 모두 입력해주세요.",
@@ -210,30 +192,12 @@ function App() {
 
   const saveEvent = async (eventData: Event) => {
     try {
-      let response;
       if (editingEvent) {
-        response = await fetch(`/api/events/${eventData.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(eventData),
-        });
+        await updateEvent(eventData);
       } else {
-        response = await fetch("/api/events", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(eventData),
-        });
+        await addEvent(eventData);
       }
 
-      if (!response.ok) {
-        throw new Error("Failed to save event");
-      }
-
-      await fetchEvents(); // 이벤트 목록 새로고침
       setEditingEvent(null);
       resetForm();
       toast({
@@ -255,17 +219,9 @@ function App() {
     }
   };
 
-  const deleteEvent = async (id: number) => {
+  const handleDeleteEvent = async (id: number) => {
     try {
-      const response = await fetch(`/api/events/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete event");
-      }
-
-      await fetchEvents(); // 이벤트 목록 새로고침
+      await deleteEvent(id);
       toast({
         title: "일정이 삭제되었습니다.",
         status: "info",
@@ -606,10 +562,6 @@ function App() {
     setHolidays(newHolidays);
   }, [currentDate]);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
   return (
     <Box w="full" h="100vh" m="auto" p={5}>
       <Flex gap={6} h="full">
@@ -622,6 +574,8 @@ function App() {
             onChange={setTitle}
             type="text"
           />
+
+          <FormField label="날짜" value={date} onChange={setDate} type="date" />
 
           <HStack width="100%">
             <FormField
@@ -829,7 +783,7 @@ function App() {
                     <IconButton
                       aria-label="Delete event"
                       icon={<DeleteIcon />}
-                      onClick={() => deleteEvent(event.id)}
+                      onClick={() => handleDeleteEvent(event.id)}
                     />
                   </HStack>
                 </HStack>

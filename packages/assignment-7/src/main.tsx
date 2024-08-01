@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import { ChakraProvider } from "@chakra-ui/react";
+import { EventProvider } from "./hooks/useEvents.tsx";
 
 async function prepare() {
   const { setupWorker } = await import("msw/browser");
@@ -13,9 +14,11 @@ async function prepare() {
 prepare().then(() => {
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
-      <ChakraProvider>
-        <App />
-      </ChakraProvider>
+      <EventProvider>
+        <ChakraProvider>
+          <App />
+        </ChakraProvider>
+      </EventProvider>
     </React.StrictMode>
   );
 });
