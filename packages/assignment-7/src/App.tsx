@@ -46,6 +46,7 @@ import { formatMonth } from "./utils/formatMonth";
 import { formatWeek } from "./utils/formatWeek";
 import { getDaysInMonth } from "./utils/getDatysInMonth";
 import { getWeekDates } from "./utils/getWeekDates";
+import { useFilteredEvents } from "./hooks/useFilteredEvents";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -70,7 +71,7 @@ export interface Event {
 
 const categories = ["업무", "개인", "가족", "기타"];
 
-const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
+export const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
 const notificationOptions = [
   { value: 1, label: "1분 전" },
@@ -368,22 +369,11 @@ function App() {
     );
   };
 
-  const filteredEvents = (() => {
-    const filtered = searchEvents(searchTerm);
-    return filtered.filter((event) => {
-      const eventDate = new Date(event.date);
-      if (view === "week") {
-        const weekDates = getWeekDates(currentDate);
-        return eventDate >= weekDates[0] && eventDate <= weekDates[6];
-      } else if (view === "month") {
-        return (
-          eventDate.getMonth() === currentDate.getMonth() &&
-          eventDate.getFullYear() === currentDate.getFullYear()
-        );
-      }
-      return true;
-    });
-  })();
+  const filteredEvents = useFilteredEvents({
+    searchTerm,
+    view,
+    currentDate,
+  });
 
   const renderWeekView = () => {
     const weekDates = getWeekDates(currentDate);
