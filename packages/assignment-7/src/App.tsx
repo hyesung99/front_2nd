@@ -47,6 +47,7 @@ import { formatWeek } from "./utils/formatWeek";
 import { getDaysInMonth } from "./utils/getDatysInMonth";
 import { getWeekDates } from "./utils/getWeekDates";
 import { useFilteredEvents } from "./hooks/useFilteredEvents";
+import { WeekCalendar } from "./components/event/eventCalendar/WeekCalendar";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -358,83 +359,11 @@ function App() {
     });
   };
 
-  const searchEvents = (term: string) => {
-    if (!term.trim()) return events;
-
-    return events.filter(
-      (event) =>
-        event.title.toLowerCase().includes(term.toLowerCase()) ||
-        event.description.toLowerCase().includes(term.toLowerCase()) ||
-        event.location.toLowerCase().includes(term.toLowerCase())
-    );
-  };
-
   const filteredEvents = useFilteredEvents({
     searchTerm,
     view,
     currentDate,
   });
-
-  const renderWeekView = () => {
-    const weekDates = getWeekDates(currentDate);
-    return (
-      <VStack data-testid="week-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatWeek(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            <Tr>
-              {weekDates.map((date) => (
-                <Td
-                  key={date.toISOString()}
-                  height="100px"
-                  verticalAlign="top"
-                  width="14.28%"
-                >
-                  <Text fontWeight="bold">{date.getDate()}</Text>
-                  {filteredEvents
-                    .filter(
-                      (event) =>
-                        new Date(event.date).toDateString() ===
-                        date.toDateString()
-                    )
-                    .map((event) => {
-                      const isNotified = notifiedEvents.includes(event.id);
-                      return (
-                        <Box
-                          key={event.id}
-                          p={1}
-                          my={1}
-                          bg={isNotified ? "red.100" : "gray.100"}
-                          borderRadius="md"
-                          fontWeight={isNotified ? "bold" : "normal"}
-                          color={isNotified ? "red.500" : "inherit"}
-                        >
-                          <HStack spacing={1}>
-                            {isNotified && <BellIcon />}
-                            <Text fontSize="sm" noOfLines={1}>
-                              {event.title}
-                            </Text>
-                          </HStack>
-                        </Box>
-                      );
-                    })}
-                </Td>
-              ))}
-            </Tr>
-          </Tbody>
-        </Table>
-      </VStack>
-    );
-  };
 
   const renderMonthView = () => {
     const daysInMonth = getDaysInMonth(
@@ -694,20 +623,25 @@ function App() {
             />
           </HStack>
 
-          {view === "week" && renderWeekView()}
+          {/* {view === "week" && renderWeekView()} */}
+          {view === "week" && (
+            <WeekCalendar
+              currentDate={currentDate}
+              filteredEvents={filteredEvents}
+              notifiedEvents={notifiedEvents}
+            />
+          )}
           {view === "month" && renderMonthView()}
         </VStack>
 
         <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">
-          <FormControl>
-            <FormLabel>일정 검색</FormLabel>
-            <Input
-              placeholder="검색어를 입력하세요"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </FormControl>
-
+          <FormField
+            placeholder="검색어를 입력하세요"
+            label="일정 검색"
+            value={searchTerm}
+            onChange={setSearchTerm}
+            type="text"
+          />
           {filteredEvents.length === 0 ? (
             <Text>검색 결과가 없습니다.</Text>
           ) : (
