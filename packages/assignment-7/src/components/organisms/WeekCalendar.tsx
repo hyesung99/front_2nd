@@ -1,4 +1,4 @@
-import { getWeekDates } from "../../../utils/getWeekDates";
+import { getWeekDates } from "../../utils/getWeekDates";
 
 import { BellIcon } from "@chakra-ui/icons";
 import {
@@ -14,8 +14,9 @@ import {
   Tr,
   VStack,
 } from "@chakra-ui/react";
-import { Event, weekDays } from "../../../App";
-import { formatWeek } from "../../../utils/formatWeek";
+import { Event, weekDays } from "../../App";
+import { formatWeek } from "../../utils/formatWeek";
+import { NotificationItem } from "../atom/NotificationItem";
 
 interface WeekCalendarProps {
   currentDate: Date;
@@ -62,22 +63,14 @@ export const WeekCalendar = ({
                   .map((event) => {
                     const isNotified = notifiedEvents.includes(event.id);
                     return (
-                      <Box
+                      <NotificationItem
                         key={event.id}
-                        p={1}
-                        my={1}
-                        bg={isNotified ? "red.100" : "gray.100"}
-                        borderRadius="md"
-                        fontWeight={isNotified ? "bold" : "normal"}
-                        color={isNotified ? "red.500" : "inherit"}
-                      >
-                        <HStack spacing={1}>
-                          {isNotified && <BellIcon />}
-                          <Text fontSize="sm" noOfLines={1}>
-                            {event.title}
-                          </Text>
-                        </HStack>
-                      </Box>
+                        title={event.title}
+                        isNotified={isNotified}
+                        additional={{
+                          left: isNotified ? <BellIcon /> : undefined,
+                        }}
+                      />
                     );
                   })}
               </Td>

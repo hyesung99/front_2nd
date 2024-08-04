@@ -38,16 +38,14 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { FormCheckbox } from "./components/common/FormCheckbox";
-import { FormField } from "./components/common/FormField";
-import { FormSelect } from "./components/common/FormSelect";
+import { FormCheckbox } from "./components/molecules/FormCheckbox";
+import { FormField } from "./components/molecules/FormField";
+import { FormSelect } from "./components/molecules/FormSelect";
+import { WeekCalendar } from "./components/organisms/WeekCalendar";
 import { useEvents } from "./hooks/useEvents";
-import { formatMonth } from "./utils/formatMonth";
-import { formatWeek } from "./utils/formatWeek";
-import { getDaysInMonth } from "./utils/getDatysInMonth";
-import { getWeekDates } from "./utils/getWeekDates";
 import { useFilteredEvents } from "./hooks/useFilteredEvents";
-import { WeekCalendar } from "./components/event/eventCalendar/WeekCalendar";
+import { formatMonth } from "./utils/formatMonth";
+import { getDaysInMonth } from "./utils/getDatysInMonth";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
