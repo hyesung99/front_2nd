@@ -26,13 +26,7 @@ import {
   IconButton,
   Input,
   Select,
-  Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   useInterval,
   useToast,
   VStack,
@@ -41,11 +35,10 @@ import { useEffect, useRef, useState } from "react";
 import { FormCheckbox } from "./components/molecules/FormCheckbox";
 import { FormField } from "./components/molecules/FormField";
 import { FormSelect } from "./components/molecules/FormSelect";
-import { WeekCalendar } from "./components/organisms/WeekCalendar";
+import { MonthlyCalendar } from "./components/organisms/MonthlyCalendar";
+import { WeeklyCalendar } from "./components/organisms/WeeklyCalendar";
 import { useEvents } from "./hooks/useEvents";
 import { useFilteredEvents } from "./hooks/useFilteredEvents";
-import { formatMonth } from "./utils/formatMonth";
-import { getDaysInMonth } from "./utils/getDatysInMonth";
 
 type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
 
@@ -363,112 +356,112 @@ function App() {
     currentDate,
   });
 
-  const renderMonthView = () => {
-    const daysInMonth = getDaysInMonth(
-      currentDate.getFullYear(),
-      currentDate.getMonth()
-    );
-    const firstDayOfMonth = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      1
-    ).getDay();
-    const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-    const weeks = [];
-    let week = Array(7).fill(null);
+  // const renderMonthView = () => {
+  //   const daysInMonth = getDaysInMonth(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth()
+  //   );
+  //   const firstDayOfMonth = new Date(
+  //     currentDate.getFullYear(),
+  //     currentDate.getMonth(),
+  //     1
+  //   ).getDay();
+  //   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  //   const weeks = [];
+  //   let week = Array(7).fill(null);
 
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      week[i] = null;
-    }
+  //   for (let i = 0; i < firstDayOfMonth; i++) {
+  //     week[i] = null;
+  //   }
 
-    for (const day of days) {
-      const dayIndex = (firstDayOfMonth + day - 1) % 7;
-      week[dayIndex] = day;
-      if (dayIndex === 6 || day === daysInMonth) {
-        weeks.push(week);
-        week = Array(7).fill(null);
-      }
-    }
+  //   for (const day of days) {
+  //     const dayIndex = (firstDayOfMonth + day - 1) % 7;
+  //     week[dayIndex] = day;
+  //     if (dayIndex === 6 || day === daysInMonth) {
+  //       weeks.push(week);
+  //       week = Array(7).fill(null);
+  //     }
+  //   }
 
-    return (
-      <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-        <Heading size="md">{formatMonth(currentDate)}</Heading>
-        <Table variant="simple" w="full">
-          <Thead>
-            <Tr>
-              {weekDays.map((day) => (
-                <Th key={day} width="14.28%">
-                  {day}
-                </Th>
-              ))}
-            </Tr>
-          </Thead>
-          <Tbody>
-            {weeks.map((week, weekIndex) => (
-              <Tr key={weekIndex}>
-                {week.map((day, dayIndex) => {
-                  const dateString = day
-                    ? `${currentDate.getFullYear()}-${String(
-                        currentDate.getMonth() + 1
-                      ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-                    : "";
-                  const holiday = holidays[dateString];
+  //   return (
+  //     <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
+  //       <Heading size="md">{formatMonth(currentDate)}</Heading>
+  //       <Table variant="simple" w="full">
+  //         <Thead>
+  //           <Tr>
+  //             {weekDays.map((day) => (
+  //               <Th key={day} width="14.28%">
+  //                 {day}
+  //               </Th>
+  //             ))}
+  //           </Tr>
+  //         </Thead>
+  //         <Tbody>
+  //           {weeks.map((week, weekIndex) => (
+  //             <Tr key={weekIndex}>
+  //               {week.map((day, dayIndex) => {
+  //                 const dateString = day
+  //                   ? `${currentDate.getFullYear()}-${String(
+  //                       currentDate.getMonth() + 1
+  //                     ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+  //                   : "";
+  //                 const holiday = holidays[dateString];
 
-                  return (
-                    <Td
-                      key={dayIndex}
-                      height="100px"
-                      verticalAlign="top"
-                      width="14.28%"
-                      position="relative"
-                    >
-                      {day && (
-                        <>
-                          <Text fontWeight="bold">{day}</Text>
-                          {holiday && (
-                            <Text color="red.500" fontSize="sm">
-                              {holiday}
-                            </Text>
-                          )}
-                          {filteredEvents
-                            .filter(
-                              (event) => new Date(event.date).getDate() === day
-                            )
-                            .map((event) => {
-                              const isNotified = notifiedEvents.includes(
-                                event.id
-                              );
-                              return (
-                                <Box
-                                  key={event.id}
-                                  p={1}
-                                  my={1}
-                                  bg={isNotified ? "red.100" : "gray.100"}
-                                  borderRadius="md"
-                                  fontWeight={isNotified ? "bold" : "normal"}
-                                  color={isNotified ? "red.500" : "inherit"}
-                                >
-                                  <HStack spacing={1}>
-                                    {isNotified && <BellIcon />}
-                                    <Text fontSize="sm" noOfLines={1}>
-                                      {event.title}
-                                    </Text>
-                                  </HStack>
-                                </Box>
-                              );
-                            })}
-                        </>
-                      )}
-                    </Td>
-                  );
-                })}
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      </VStack>
-    );
-  };
+  //                 return (
+  //                   <Td
+  //                     key={dayIndex}
+  //                     height="100px"
+  //                     verticalAlign="top"
+  //                     width="14.28%"
+  //                     position="relative"
+  //                   >
+  //                     {day && (
+  //                       <>
+  //                         <Text fontWeight="bold">{day}</Text>
+  //                         {holiday && (
+  //                           <Text color="red.500" fontSize="sm">
+  //                             {holiday}
+  //                           </Text>
+  //                         )}
+  //                         {filteredEvents
+  //                           .filter(
+  //                             (event) => new Date(event.date).getDate() === day
+  //                           )
+  //                           .map((event) => {
+  //                             const isNotified = notifiedEvents.includes(
+  //                               event.id
+  //                             );
+  //                             return (
+  //                               <Box
+  //                                 key={event.id}
+  //                                 p={1}
+  //                                 my={1}
+  //                                 bg={isNotified ? "red.100" : "gray.100"}
+  //                                 borderRadius="md"
+  //                                 fontWeight={isNotified ? "bold" : "normal"}
+  //                                 color={isNotified ? "red.500" : "inherit"}
+  //                               >
+  //                                 <HStack spacing={1}>
+  //                                   {isNotified && <BellIcon />}
+  //                                   <Text fontSize="sm" noOfLines={1}>
+  //                                     {event.title}
+  //                                   </Text>
+  //                                 </HStack>
+  //                               </Box>
+  //                             );
+  //                           })}
+  //                       </>
+  //                     )}
+  //                   </Td>
+  //                 );
+  //               })}
+  //             </Tr>
+  //           ))}
+  //         </Tbody>
+  //       </Table>
+  //     </VStack>
+  //   );
+  // };
 
   useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
 
@@ -623,13 +616,20 @@ function App() {
 
           {/* {view === "week" && renderWeekView()} */}
           {view === "week" && (
-            <WeekCalendar
+            <WeeklyCalendar
               currentDate={currentDate}
               filteredEvents={filteredEvents}
               notifiedEvents={notifiedEvents}
             />
           )}
-          {view === "month" && renderMonthView()}
+          {view === "month" && (
+            <MonthlyCalendar
+              currentDate={currentDate}
+              filteredEvents={filteredEvents}
+              notifiedEvents={notifiedEvents}
+              holidays={holidays}
+            />
+          )}
         </VStack>
 
         <VStack data-testid="event-list" w="500px" h="full" overflowY="auto">

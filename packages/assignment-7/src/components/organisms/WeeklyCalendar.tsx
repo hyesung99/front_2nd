@@ -2,9 +2,7 @@ import { getWeekDates } from "../../utils/getWeekDates";
 
 import { BellIcon } from "@chakra-ui/icons";
 import {
-  Box,
   Heading,
-  HStack,
   Table,
   Tbody,
   Td,
@@ -18,17 +16,17 @@ import { Event, weekDays } from "../../App";
 import { formatWeek } from "../../utils/formatWeek";
 import { NotificationItem } from "../atom/NotificationItem";
 
-interface WeekCalendarProps {
+interface WeeklyCalendarProps {
   currentDate: Date;
   filteredEvents: Event[];
   notifiedEvents: number[];
 }
 
-export const WeekCalendar = ({
+export const WeeklyCalendar = ({
   currentDate,
   filteredEvents,
   notifiedEvents,
-}: WeekCalendarProps) => {
+}: WeeklyCalendarProps) => {
   const weekDates = getWeekDates(currentDate);
 
   return (

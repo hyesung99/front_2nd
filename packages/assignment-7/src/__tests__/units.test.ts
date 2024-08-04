@@ -1,5 +1,5 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { getDaysInMonth } from "../utils/getDatysInMonth";
+import { getDaysInMonth } from "../utils/getDaysInMonth";
 import { getWeekDates } from "../utils/getWeekDates";
 import { formatWeek } from "../utils/formatWeek";
 import { formatMonth } from "../utils/formatMonth";
