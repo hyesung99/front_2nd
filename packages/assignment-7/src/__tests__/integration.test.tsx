@@ -15,6 +15,7 @@ import { ReactNode } from "react";
 import App from "../App";
 import { EventProvider } from "../hooks/useEvents";
 import { mockApiHandlers, resetEvents } from "../mockApiHandlers";
+import { REPEAT_TYPES } from "../constants/date";
 
 const TEST_IDS = {
   eventSubmitButton: "event-submit-button",
@@ -247,6 +248,52 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       const 어린이날 = target.nextSibling;
       expect(어린이날).toHaveTextContent("어린이날");
+    });
+  });
+
+  describe("반복 일정 테스트", () => {
+    beforeEach(resetEvents);
+    test("반복 일정 옵션을 선택하면 반복 일정 옵션이 표시되는지 확인한다", async () => {
+      const { user } = setup(<App />);
+
+      const 반복일정옵션 = screen.getByText("반복 일정");
+      await user.click(반복일정옵션);
+
+      const 반복유형 = screen.getByText("반복 유형");
+      const 반복간격 = screen.getByText("반복 간격");
+      const 반복종료일 = screen.getByText("반복 종료일");
+      expect(반복유형).toBeInTheDocument();
+      expect(반복간격).toBeInTheDocument();
+      expect(반복종료일).toBeInTheDocument();
+    });
+    test("반복 유형을 선택하면 반복 유형이 표시되는지 확인하고 옵션들이 일치하는지 확인한다", async () => {
+      const { user } = setup(<App />);
+
+      const 반복일정옵션 = screen.getByText("반복 일정");
+      await user.click(반복일정옵션);
+
+      const 반복유형 = screen.getByLabelText("반복 유형") as HTMLSelectElement;
+
+      REPEAT_TYPES.forEach(({ label }) => {
+        expect(screen.getByRole("option", { name: label })).toBeInTheDocument();
+      });
+
+      expect(반복유형.options.length).toBe(REPEAT_TYPES.length);
+
+      Array.from(반복유형.options).forEach((option, index) => {
+        expect(option.text).toBe(REPEAT_TYPES[index].label);
+        expect(option.value).toBe(REPEAT_TYPES[index].value);
+      });
+
+      await user.selectOptions(반복유형, REPEAT_TYPES[0].value);
+      expect(반복유형).toHaveValue(REPEAT_TYPES[0].value);
+    });
+
+    test("각 반복 유형에 대해 간격을 설정할 수 있다.", async () => {
+      const { user } = setup(<App />);
+
+      const 반복일정옵션 = screen.getByText("반복 일정");
+      await user.click(반복일정옵션);
     });
   });
 });
