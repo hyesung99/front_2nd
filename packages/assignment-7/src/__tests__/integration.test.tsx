@@ -295,5 +295,53 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
       const 반복일정옵션 = screen.getByText("반복 일정");
       await user.click(반복일정옵션);
     });
+    test("반복 설정한 일정을 추가하면 모든 반복 일정이 달력에 표시되는지 확인한다.", async () => {
+      vi.setSystemTime(new Date("2024-08-01"));
+
+      const { user } = setup(<App />);
+
+      await user.type(screen.getByLabelText("제목"), "반복 테스트 일정");
+      await user.type(screen.getByLabelText("날짜"), "2024-08-01");
+      await user.type(screen.getByLabelText("시작 시간"), "10:00");
+      await user.type(screen.getByLabelText("종료 시간"), "11:00");
+
+      const 반복일정옵션 = screen.getByLabelText("반복 일정");
+      await user.click(반복일정옵션);
+
+      const 반복유형 = screen.getByLabelText("반복 유형");
+      await user.selectOptions(반복유형, "daily");
+
+      const 반복간격 = screen.getByLabelText("반복 간격");
+      await user.type(반복간격, "1");
+
+      const 반복종료일 = screen.getByLabelText("반복 종료일");
+      await user.type(반복종료일, "2024-08-07");
+
+      const submitButton = screen.getByTestId("event-submit-button");
+      await user.click(submitButton);
+
+      const viewSelect = screen.getByLabelText("view");
+      await user.selectOptions(viewSelect, "week");
+
+      await waitFor(() => {
+        const weekView = screen.getByTestId("week-view");
+        const eventItems = weekView.querySelectorAll(".chakra-text");
+        const repeatEvents = Array.from(eventItems).filter(
+          (item) => item.textContent === "반복 테스트 일정"
+        );
+        expect(repeatEvents).toHaveLength(7);
+      });
+
+      await user.selectOptions(viewSelect, "month");
+
+      await waitFor(() => {
+        const monthView = screen.getByTestId("month-view");
+        const eventItems = monthView.querySelectorAll(".chakra-text");
+        const repeatEvents = Array.from(eventItems).filter(
+          (item) => item.textContent === "반복 테스트 일정"
+        );
+        expect(repeatEvents).toHaveLength(7);
+      });
+    });
   });
 });
