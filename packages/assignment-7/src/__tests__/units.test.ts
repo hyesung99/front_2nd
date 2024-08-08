@@ -3,6 +3,9 @@ import { getDaysInMonth } from "../utils/getDaysInMonth";
 import { getWeekDates } from "../utils/getWeekDates";
 import { formatWeek } from "../utils/formatWeek";
 import { formatMonth } from "../utils/formatMonth";
+import { REPEAT_TYPE } from "../constants/date";
+import { getNextDate } from "../utils/getNextDate";
+import { addMonths } from "../utils/addMonths";
 
 describe("단위 테스트: 날짜 및 시간 관리", () => {
   describe("getDaysInMonth 함수", () => {
@@ -180,6 +183,88 @@ describe("단위 테스트: 날짜 및 시간 관리", () => {
     test("반환값이 올바른 형식의 문자열인지 확인한다", () => {
       const result = formatMonth(new Date(2023, 5, 15));
       expect(result).toMatch(/^\d{4}년 \d{1,2}월$/);
+    });
+  });
+  describe("getNextDate 함수", () => {
+    test("일간 반복 시 다음 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.DAILY });
+      expect(result).toEqual(new Date("2023-05-16"));
+    });
+
+    test("주간 반복 시 7일 후의 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.WEEKLY });
+      expect(result).toEqual(new Date("2023-05-22"));
+    });
+
+    test("월간 반복 시 다음 달의 같은 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.MONTHLY });
+      expect(result).toEqual(new Date("2023-06-15"));
+    });
+
+    test("연간 반복 시 다음 해의 같은 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.YEARLY });
+      expect(result).toEqual(new Date("2024-05-15"));
+    });
+
+    test("알 수 없는 반복 유형에 대해 원래 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      const result = getNextDate({ date, repeatType: "UNKNOWN" as any });
+      expect(result).toEqual(date);
+    });
+
+    test("월말 날짜에 대해 월간 반복을 올바르게 처리한다", () => {
+      const date = new Date("2023-01-31");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.MONTHLY });
+      expect(result).toEqual(new Date("2023-02-28")); // 2월은 28일까지만 있으므로
+    });
+
+    test("윤년을 고려하여 연간 반복을 올바르게 처리한다", () => {
+      const date = new Date("2024-02-29");
+      const result = getNextDate({ date, repeatType: REPEAT_TYPE.YEARLY });
+      expect(result).toEqual(new Date("2025-02-28"));
+    });
+
+    test("함수가 원본 Date 객체를 변경하지 않는다", () => {
+      const originalDate = new Date("2023-05-15");
+      const dateCopy = new Date(originalDate);
+      getNextDate({ date: dateCopy, repeatType: REPEAT_TYPE.DAILY });
+      expect(dateCopy).toEqual(originalDate);
+    });
+  });
+
+  describe("addMonths 함수", () => {
+    test("기본적인 월 추가를 올바르게 처리한다", () => {
+      const date = new Date("2023-05-15");
+      expect(addMonths(date, 1)).toEqual(new Date("2023-06-15"));
+      expect(addMonths(date, 2)).toEqual(new Date("2023-07-15"));
+      expect(addMonths(date, 12)).toEqual(new Date("2024-05-15"));
+    });
+
+    test("연도를 넘어가는 월 추가를 올바르게 처리한다", () => {
+      const date = new Date("2023-12-15");
+      expect(addMonths(date, 1)).toEqual(new Date("2024-01-15"));
+      expect(addMonths(date, 13)).toEqual(new Date("2025-01-15"));
+    });
+
+    test("월말 날짜에 대해 올바르게 처리한다", () => {
+      const date = new Date("2023-01-31");
+      expect(addMonths(date, 1)).toEqual(new Date("2023-02-28"));
+      expect(addMonths(date, 2)).toEqual(new Date("2023-03-31"));
+    });
+
+    test("윤년을 올바르게 처리한다", () => {
+      const date = new Date("2024-01-31");
+      expect(addMonths(date, 1)).toEqual(new Date("2024-02-29"));
+      expect(addMonths(date, 13)).toEqual(new Date("2025-02-28"));
+    });
+
+    test("0개월 추가 시 원래 날짜를 반환한다", () => {
+      const date = new Date("2023-05-15");
+      expect(addMonths(date, 0)).toEqual(date);
     });
   });
 });
