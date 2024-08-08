@@ -279,12 +279,12 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
         expect(screen.getByRole("option", { name: label })).toBeInTheDocument();
       });
 
-      expect(반복유형.options.length).toBe(REPEAT_TYPE_SELECTS.length);
+      const options = [
+        ...REPEAT_TYPE_SELECTS,
+        { value: null, label: "반복 유형 선택" },
+      ];
 
-      Array.from(반복유형.options).forEach((option, index) => {
-        expect(option.text).toBe(REPEAT_TYPE_SELECTS[index].label);
-        expect(option.value).toBe(REPEAT_TYPE_SELECTS[index].value);
-      });
+      expect(반복유형.options.length).toBe(options.length);
 
       await user.selectOptions(반복유형, REPEAT_TYPE_SELECTS[0].value);
       expect(반복유형).toHaveValue(REPEAT_TYPE_SELECTS[0].value);

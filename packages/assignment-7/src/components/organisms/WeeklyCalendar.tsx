@@ -15,6 +15,7 @@ import {
 import { Event, weekDays } from "../../App";
 import { formatWeek } from "../../utils/formatWeek";
 import { NotificationItem } from "../atom/NotificationItem";
+import { getRepeatedEvents } from "../../services/getRepeatedEvents";
 
 interface WeeklyCalendarProps {
   currentDate: Date;
@@ -65,6 +66,7 @@ export const WeeklyCalendar = ({
                         key={event.id}
                         title={event.title}
                         isNotified={isNotified}
+                        isRepeating={!!event.repeat}
                         additional={{
                           left: isNotified ? <BellIcon /> : undefined,
                         }}

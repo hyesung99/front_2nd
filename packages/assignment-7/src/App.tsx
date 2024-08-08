@@ -39,8 +39,7 @@ import { MonthlyCalendar } from "./components/organisms/MonthlyCalendar";
 import { WeeklyCalendar } from "./components/organisms/WeeklyCalendar";
 import { useEvents } from "./hooks/useEvents";
 import { useFilteredEvents } from "./hooks/useFilteredEvents";
-
-type RepeatType = "none" | "daily" | "weekly" | "monthly" | "yearly";
+import { REPEAT_TYPE_SELECTS, RepeatType } from "./constants/date";
 
 interface RepeatInfo {
   type: RepeatType;
@@ -135,7 +134,6 @@ function App() {
   const toast = useToast();
 
   const addOrUpdateEvent = async () => {
-    console.log(title, date, startTime, endTime);
     if (!title || !date || !startTime || !endTime) {
       toast({
         title: "필수 정보를 모두 입력해주세요.",
@@ -356,113 +354,6 @@ function App() {
     currentDate,
   });
 
-  // const renderMonthView = () => {
-  //   const daysInMonth = getDaysInMonth(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth()
-  //   );
-  //   const firstDayOfMonth = new Date(
-  //     currentDate.getFullYear(),
-  //     currentDate.getMonth(),
-  //     1
-  //   ).getDay();
-  //   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-  //   const weeks = [];
-  //   let week = Array(7).fill(null);
-
-  //   for (let i = 0; i < firstDayOfMonth; i++) {
-  //     week[i] = null;
-  //   }
-
-  //   for (const day of days) {
-  //     const dayIndex = (firstDayOfMonth + day - 1) % 7;
-  //     week[dayIndex] = day;
-  //     if (dayIndex === 6 || day === daysInMonth) {
-  //       weeks.push(week);
-  //       week = Array(7).fill(null);
-  //     }
-  //   }
-
-  //   return (
-  //     <VStack data-testid="month-view" align="stretch" w="full" spacing={4}>
-  //       <Heading size="md">{formatMonth(currentDate)}</Heading>
-  //       <Table variant="simple" w="full">
-  //         <Thead>
-  //           <Tr>
-  //             {weekDays.map((day) => (
-  //               <Th key={day} width="14.28%">
-  //                 {day}
-  //               </Th>
-  //             ))}
-  //           </Tr>
-  //         </Thead>
-  //         <Tbody>
-  //           {weeks.map((week, weekIndex) => (
-  //             <Tr key={weekIndex}>
-  //               {week.map((day, dayIndex) => {
-  //                 const dateString = day
-  //                   ? `${currentDate.getFullYear()}-${String(
-  //                       currentDate.getMonth() + 1
-  //                     ).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-  //                   : "";
-  //                 const holiday = holidays[dateString];
-
-  //                 return (
-  //                   <Td
-  //                     key={dayIndex}
-  //                     height="100px"
-  //                     verticalAlign="top"
-  //                     width="14.28%"
-  //                     position="relative"
-  //                   >
-  //                     {day && (
-  //                       <>
-  //                         <Text fontWeight="bold">{day}</Text>
-  //                         {holiday && (
-  //                           <Text color="red.500" fontSize="sm">
-  //                             {holiday}
-  //                           </Text>
-  //                         )}
-  //                         {filteredEvents
-  //                           .filter(
-  //                             (event) => new Date(event.date).getDate() === day
-  //                           )
-  //                           .map((event) => {
-  //                             const isNotified = notifiedEvents.includes(
-  //                               event.id
-  //                             );
-  //                             return (
-  //                               <Box
-  //                                 key={event.id}
-  //                                 p={1}
-  //                                 my={1}
-  //                                 bg={isNotified ? "red.100" : "gray.100"}
-  //                                 borderRadius="md"
-  //                                 fontWeight={isNotified ? "bold" : "normal"}
-  //                                 color={isNotified ? "red.500" : "inherit"}
-  //                               >
-  //                                 <HStack spacing={1}>
-  //                                   {isNotified && <BellIcon />}
-  //                                   <Text fontSize="sm" noOfLines={1}>
-  //                                     {event.title}
-  //                                   </Text>
-  //                                 </HStack>
-  //                               </Box>
-  //                             );
-  //                           })}
-  //                       </>
-  //                     )}
-  //                   </Td>
-  //                 );
-  //               })}
-  //             </Tr>
-  //           ))}
-  //         </Tbody>
-  //       </Table>
-  //     </VStack>
-  //   );
-  // };
-
   useInterval(checkUpcomingEvents, 1000); // 1초마다 체크
 
   useEffect(() => {
@@ -547,36 +438,30 @@ function App() {
 
           {isRepeating && (
             <VStack width="100%">
-              <FormControl>
-                <FormLabel>반복 유형</FormLabel>
-                <Select
-                  value={repeatType}
-                  onChange={(e) => setRepeatType(e.target.value as RepeatType)}
-                >
-                  <option value="daily">매일</option>
-                  <option value="weekly">매주</option>
-                  <option value="monthly">매월</option>
-                  <option value="yearly">매년</option>
-                </Select>
-              </FormControl>
+              <FormSelect
+                value={repeatType}
+                onChange={setRepeatType}
+                label="반복 유형"
+                placeholder="반복 유형 선택"
+                options={REPEAT_TYPE_SELECTS.map(({ value, label }) => ({
+                  value,
+                  label,
+                }))}
+              />
+
               <HStack width="100%">
-                <FormControl>
-                  <FormLabel>반복 간격</FormLabel>
-                  <Input
-                    type="number"
-                    value={repeatInterval}
-                    onChange={(e) => setRepeatInterval(Number(e.target.value))}
-                    min={1}
-                  />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>반복 종료일</FormLabel>
-                  <Input
-                    type="date"
-                    value={repeatEndDate}
-                    onChange={(e) => setRepeatEndDate(e.target.value)}
-                  />
-                </FormControl>
+                <FormField
+                  label="반복 간격"
+                  value={repeatInterval}
+                  onChange={setRepeatInterval}
+                  type="number"
+                />
+                <FormField
+                  label="반복 종료일"
+                  value={repeatEndDate}
+                  onChange={setRepeatEndDate}
+                  type="date"
+                />
               </HStack>
             </VStack>
           )}

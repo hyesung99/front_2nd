@@ -1,7 +1,5 @@
 import {
-  Box,
   Heading,
-  HStack,
   Table,
   Tbody,
   Td,
@@ -12,10 +10,9 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Event, weekDays } from "../../App";
-import { getDaysInMonth } from "../../utils/getDaysInMonth";
 import { formatMonth } from "../../utils/formatMonth";
-import { BellIcon } from "@chakra-ui/icons";
 import { getWeeksInMonth } from "../../utils/getWeeksInMonth";
+import { NotificationItem } from "../atom/NotificationItem";
 
 interface MonthlyCalendarProps {
   currentDate: Date;
@@ -84,22 +81,13 @@ export const MonthlyCalendar = ({
                               event.id
                             );
                             return (
-                              <Box
+                              <NotificationItem
                                 key={event.id}
-                                p={1}
-                                my={1}
-                                bg={isNotified ? "red.100" : "gray.100"}
-                                borderRadius="md"
-                                fontWeight={isNotified ? "bold" : "normal"}
-                                color={isNotified ? "red.500" : "inherit"}
-                              >
-                                <HStack spacing={1}>
-                                  {isNotified && <BellIcon />}
-                                  <Text fontSize="sm" noOfLines={1}>
-                                    {event.title}
-                                  </Text>
-                                </HStack>
-                              </Box>
+                                title={event.title}
+                                isNotified={isNotified}
+                                isRepeating={!!event.repeat}
+                                color={event.repeat ? "purple.500" : undefined}
+                              />
                             );
                           })}
                       </>
