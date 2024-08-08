@@ -12,10 +12,11 @@ import {
 
 import { setupServer } from "msw/node";
 import { ReactNode } from "react";
-import App from "../App";
+import App, { Event } from "../App";
 import { EventProvider } from "../hooks/useEvents";
 import { mockApiHandlers, resetEvents } from "../mockApiHandlers";
-import { REPEAT_TYPES } from "../constants/date";
+import { REPEAT_TYPE_SELECTS } from "../constants/date";
+import { getRepeatedEvents } from "../services/getRepeatedEvents";
 
 const TEST_IDS = {
   eventSubmitButton: "event-submit-button",
@@ -274,19 +275,19 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
 
       const 반복유형 = screen.getByLabelText("반복 유형") as HTMLSelectElement;
 
-      REPEAT_TYPES.forEach(({ label }) => {
+      REPEAT_TYPE_SELECTS.forEach(({ label }) => {
         expect(screen.getByRole("option", { name: label })).toBeInTheDocument();
       });
 
-      expect(반복유형.options.length).toBe(REPEAT_TYPES.length);
+      expect(반복유형.options.length).toBe(REPEAT_TYPE_SELECTS.length);
 
       Array.from(반복유형.options).forEach((option, index) => {
-        expect(option.text).toBe(REPEAT_TYPES[index].label);
-        expect(option.value).toBe(REPEAT_TYPES[index].value);
+        expect(option.text).toBe(REPEAT_TYPE_SELECTS[index].label);
+        expect(option.value).toBe(REPEAT_TYPE_SELECTS[index].value);
       });
 
-      await user.selectOptions(반복유형, REPEAT_TYPES[0].value);
-      expect(반복유형).toHaveValue(REPEAT_TYPES[0].value);
+      await user.selectOptions(반복유형, REPEAT_TYPE_SELECTS[0].value);
+      expect(반복유형).toHaveValue(REPEAT_TYPE_SELECTS[0].value);
     });
 
     test("각 반복 유형에 대해 간격을 설정할 수 있다.", async () => {
@@ -341,6 +342,53 @@ describe("일정 관리 애플리케이션 통합 테스트", () => {
           (item) => item.textContent === "반복 테스트 일정"
         );
         expect(repeatEvents).toHaveLength(7);
+      });
+    });
+  });
+  describe("getRepeatedEvents 함수 통합 테스트", () => {
+    test("반복 일정이 올바르게 생성되는지 확인한다", async () => {
+      const baseEvent: Event = {
+        id: 1,
+        description: "테스트 설명",
+        location: "테스트 장소",
+        category: "테스트 카테고리",
+        notificationTime: 10,
+        title: "반복 테스트 일정",
+        date: "2024-08-01",
+        startTime: "10:00",
+        endTime: "11:00",
+        repeat: {
+          type: "daily",
+          interval: 1,
+          endDate: "2024-08-07",
+        },
+      };
+
+      const startDate = new Date("2024-08-01");
+      const endDate = new Date("2024-08-31");
+
+      const repeatedEvents = getRepeatedEvents({
+        event: baseEvent,
+        startDate,
+        endDate,
+      });
+
+      expect(repeatedEvents).toHaveLength(7);
+      expect(repeatedEvents[0].date).toBe("2024-08-01");
+      expect(repeatedEvents[6].date).toBe("2024-08-07");
+
+      repeatedEvents.forEach((event, index) => {
+        expect(event.title).toBe(baseEvent.title);
+        expect(event.startTime).toBe(baseEvent.startTime);
+        expect(event.endTime).toBe(baseEvent.endTime);
+        expect(event.id).not.toBe(baseEvent.id);
+        if (index > 0) {
+          const prevDate = new Date(repeatedEvents[index - 1].date);
+          const currentDate = new Date(event.date);
+          const diffDays =
+            (currentDate.getTime() - prevDate.getTime()) / (1000 * 3600 * 24);
+          expect(diffDays).toBe(1);
+        }
       });
     });
   });
